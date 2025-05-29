@@ -133,7 +133,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('ingredients',
-                  'tags',
+                  # 'tags',
                   'image',
                   'name',
                   'text',
