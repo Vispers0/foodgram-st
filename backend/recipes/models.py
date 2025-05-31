@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError  # type: ignore
 from .constants import (MAX_NAME_LENGTH, MAX_SLUG_LENGTH, MAX_UNIT_LENGTH,
                         MAX_INGREDIENT_AMOUNT, MIN_INGREDIENT_AMOUNT,
                         MAX_COOKING_TIME, MIN_COOKING_TIME,
-                        MAX_TAG_NAME_LENGTH, MAX_INGREDIENT_NAME_LENGTH)
+                        MAX_INGREDIENT_NAME_LENGTH)
 from .querysets import AnnotatedRecipeQuerySet
 
 
