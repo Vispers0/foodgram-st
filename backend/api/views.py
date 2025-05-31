@@ -14,9 +14,9 @@ from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
 from django.db.models import Sum, F  # type: ignore
 from django.shortcuts import redirect  # type: ignore
 
-from recipes.models import Tag, Recipe, Ingredient, RecipeIngredient
+from recipes.models import Recipe, Ingredient, RecipeIngredient
 from users.models import Favorite, Subscription, ShoppingCart
-from .serializers import (TagSerializer, RecipeWriteSerializer,
+from .serializers import (RecipeWriteSerializer,
                           RecipeReadSerializer, IngredientSerializer,
                           UserReadSerializer, UserWriteSerializer,
                           PasswordSerializer, FavoriteCreateSerializer,
@@ -33,11 +33,6 @@ User = get_user_model()
 class BaseReadOnlyViewset(CacheResponseMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     pagination_class = None
-
-
-class TagViewSet(BaseReadOnlyViewset):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
 
 
 class IngredientViewSet(BaseReadOnlyViewset):
@@ -318,11 +313,4 @@ class LoadDataView(APIView):
                     measurement_unit=ingredient['measurement_unit']
                 )
 
-        with open('data/tags.json', 'r', encoding='utf-8') as file:
-            tags = json.load(file)
-            for tag in tags:
-                Tag.objects.get_or_create(
-                    name=tag['name'],
-                    slug=tag['slug']
-                )
         return Response(status=status.HTTP_204_NO_CONTENT)

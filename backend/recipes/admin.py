@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group  # type: ignore
 from rest_framework.authtoken.admin import TokenAdmin  # type: ignore
 from rest_framework.authtoken.models import Token  # type: ignore
 
-from .models import Ingredient, Tag, Recipe, RecipeIngredient
+from .models import Ingredient, Recipe, RecipeIngredient
 from users.models import ShoppingCart, Favorite
 
 
@@ -34,10 +34,8 @@ class RecipeAdmin(BaseAdmin):
               'author',
               'image',
               'text',
-              'tags',
               'cooking_time',
               'short_url')
-    list_filter = ('tags',)
     search_fields = ('name', 'author__username')
     verbose_name = 'Рецепт'
     verbose_name_plural = 'Рецепты'
@@ -52,14 +50,6 @@ class IngredientAdmin(BaseAdmin):
     search_fields = ('name',)
     verbose_name = 'Ингредиент'
     verbose_name_plural = 'Ингредиенты'
-
-
-class TagAdmin(BaseAdmin):
-    list_display = ('name', 'slug')
-    fields = ('name', 'slug')
-    search_fields = ('name',)
-    verbose_name = 'Тег'
-    verbose_name_plural = 'Теги'
 
 
 class RecipeIngredientAdmin(BaseAdmin):
@@ -87,7 +77,6 @@ class ShoppingCartAdmin(BaseAdmin):
 
 
 admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeIngredient, RecipeIngredientAdmin)
 admin.site.register(Favorite, FavoriteAdmin)

@@ -5,18 +5,10 @@ from django.core.files.base import ContentFile  # type: ignore
 from django.contrib.auth import get_user_model  # type: ignore
 from django.shortcuts import get_object_or_404  # type: ignore
 
-from recipes.models import Tag, Recipe, Ingredient, RecipeIngredient
+from recipes.models import Recipe, Ingredient, RecipeIngredient
 from users.models import Favorite, ShoppingCart
 
 User = get_user_model()
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ('id',
-                  'name',
-                  'slug')
 
 
 class Base64ImageField(serializers.ImageField):
@@ -94,7 +86,6 @@ class UserReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)
     ingredients = serializers.SerializerMethodField()
     author = UserReadSerializer()
     is_favorited = serializers.BooleanField(read_only=True)
@@ -103,7 +94,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id',
-                  'tags',
                   'author',
                   'ingredients',
                   'is_favorited',
@@ -124,16 +114,12 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
-    tags = serializers.ListField(child=serializers.IntegerField(
-        min_value=1),
-        allow_empty=False)
     ingredients = IngredientWriteSerializer(many=True,
                                             allow_empty=False)
 
     class Meta:
         model = Recipe
         fields = ('ingredients',
-                  # 'tags',
                   'image',
                   'name',
                   'text',
@@ -143,29 +129,12 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request:
             raise serializers.ValidationError('4. Нет данных запроса.')
-        tags = data.get('tags')
-        if not tags:
-            raise serializers.ValidationError(
-                'Не указаны теги.')
         ingredients = data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError(
                 'Не указаны ингредиенты.')
         return data
 
-    def validate_tags(self, tags):
-        if not tags:
-            raise serializers.ValidationError(
-                'Не указаны теги.')
-        len_set_tags = len(set(tags))
-        if len(tags) != len_set_tags:
-            raise serializers.ValidationError(
-                'Теги не должны повторяться.')
-        tag_objects = Tag.objects.filter(id__in=tags).order_by()
-        if not tag_objects.exists() or tag_objects.count() != len_set_tags:
-            raise serializers.ValidationError(
-                'Не все указанные теги существуют.')
-        return tags
 
     def validate_ingredients(self, ingredients):
         if not ingredients:
@@ -206,22 +175,17 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(
             author=self.context.get('request').user,
             **validated_data)
         recipe.short_url = self.convert_to_short_link(recipe.id)
-        recipe.tags.set(tags)
         self.create_recipe_ingredients(recipe, ingredients)
         recipe.save()
         return recipe
 
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         instance = super().update(instance, validated_data)
-        instance.tags.clear()
-        instance.tags.set(tags)
         instance.ingredients.clear()
         self.create_recipe_ingredients(instance, ingredients)
         instance.save()

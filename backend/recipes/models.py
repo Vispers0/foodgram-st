@@ -45,25 +45,6 @@ class Ingredient(models.Model):
         return self.name
 
 
-class Tag(models.Model):
-    name = models.CharField(max_length=MAX_TAG_NAME_LENGTH,
-                            validators=(MaxLengthValidator,),
-                            verbose_name='Название',
-                            unique=True)
-    slug = models.SlugField(unique=True, max_length=MAX_SLUG_LENGTH,
-                            validators=(MaxLengthValidator,
-                                        validate_slug),
-                            verbose_name='Слаг')
-
-    class Meta:
-        ordering = ('name',)
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-
-    def __str__(self):
-        return self.name
-
-
 User = get_user_model()
 
 
@@ -85,11 +66,6 @@ class Recipe(models.Model):
                                          verbose_name='Ингредиенты',
                                          blank=True,
                                          )
-    tags = models.ManyToManyField(Tag,
-                                  related_name='recipes',
-                                  verbose_name='Теги',
-                                  blank=True,
-                                  )
     cooking_time = models.PositiveSmallIntegerField(
         validators=(
             MaxValueValidator(MAX_COOKING_TIME),
